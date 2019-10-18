@@ -1,0 +1,37 @@
+{
+    "job": {
+        "setting": {
+            "speed": {
+                 "channel":1
+            }
+        },
+        "content": [
+            {
+                "reader": {
+                    "name": "mysqlreader",
+                    "parameter": {
+                        "username": "person_rw",
+                        "password": "fdWUE89)3D*FdfWE43",
+                        "connection": [
+                            {
+                                "querySql": [
+                                    "select * from AB_retain_daily where date<=20190201;"
+                                ],
+                                "jdbcUrl": [
+                                    "jdbc:mysql://10.100.10.22:3306/person"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "writer": {
+                    "name": "streamwriter",
+                    "parameter": {
+                        "print": true,
+                        "encoding": "UTF-8"
+                    }
+                }
+            }
+        ]
+    }
+}

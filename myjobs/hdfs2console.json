@@ -1,0 +1,36 @@
+{
+  "job": {
+    "content": [
+      {
+        "reader": {
+          "name": "hdfsreader",
+          "parameter": {
+            "column": [
+              {
+                "index": 0,
+                "type": "string"
+              }
+            ],
+            "defaultFS": "hdfs://bjyg-10-100-6-112.as-hadoop.intra.openredcloud.com:9000",
+            "encoding": "UTF-8",
+            "fieldDelimiter": " ",
+            "fileType": "text",
+            "path": "/person/logs/act_jf/2019/09/01/app-201909010400.log.108"
+          }
+        },
+        "writer": {
+          "name": "streamwriter",
+          "parameter": {
+            "encoding": "utf8",
+            "print": false
+          }
+        }
+      }
+    ],
+    "setting": {
+      "speed": {
+        "channel": "2"
+      }
+    }
+  }
+}

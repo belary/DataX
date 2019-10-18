@@ -1,0 +1,43 @@
+{
+  "job": {
+    "content": [
+      {
+        "reader": {
+          "name": "mysqlreader",
+          "parameter": {
+            "username": "person_rw",
+            "password": "fdWUE89)3D*FdfWE43",
+            "connection": [
+              {
+                "querySql": [
+                  "select id, date, dau from AB_retain_daily where date<=20190201;"
+                ],
+                "jdbcUrl": [
+                  "jdbc:mysql://10.100.10.22:3306/person"
+                ]
+              }
+            ]
+          }
+        },
+        "writer": {
+          "name": "hdfswriter",
+          "parameter": {
+            "column": [],
+            "compress": "",
+            "defaultFS": "",
+            "fieldDelimiter": "",
+            "fileName": "",
+            "fileType": "",
+            "path": "",
+            "writeMode": ""
+          }
+        }
+      }
+    ],
+    "setting": {
+      "speed": {
+        "channel": ""
+      }
+    }
+  }
+}

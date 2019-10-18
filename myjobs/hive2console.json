@@ -1,0 +1,30 @@
+{
+  "job": {
+    "content": [
+      {
+        "reader": {
+          "name": "hivereader",
+          "parameter": {
+            "hiveSql": [
+              "select uuid from fc_show_fact_web;"
+            ],
+            "defaultFS": "hdfs://bjyg-10-100-6-112.as-hadoop.intra.openredcloud.com:9000"
+          }
+        },
+        "writer": {
+          "name": "streamwriter",
+          "parameter": {
+            "print": true,
+            "encoding": "UTF-8"
+          }
+        }
+      }
+    ],
+    "setting": {
+      "speed": {
+        "channel":2
+      }
+    }
+  }
+
+}

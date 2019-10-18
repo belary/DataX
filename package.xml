@@ -166,6 +166,14 @@
             </includes>
             <outputDirectory>datax</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>hivereader/target/datax/</directory>
+            <includes>
+                <include>**/*.*</include>
+            </includes>
+            <outputDirectory>datax</outputDirectory>
+        </fileSet>
+
 
         <!-- writer -->
         <fileSet>
@@ -338,6 +346,13 @@
         </fileSet>
         <fileSet>
             <directory>adbpgwriter/target/datax/</directory>
+            <includes>
+                <include>**/*.*</include>
+            </includes>
+            <outputDirectory>datax</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>hivewriter/target/datax/</directory>
             <includes>
                 <include>**/*.*</include>
             </includes>
