@@ -224,9 +224,12 @@ public class TaskGroupContainer extends AbstractContainer {
                                     this.taskGroupId, taskId, lastExecutor.getAttemptCount());
                         }
                     }
+                    // task执行线程生成和初始化该线程的配置数据（主要是reader|writer的配置)
                     Configuration taskConfigForRun = taskMaxRetryTimes > 1 ? taskConfig.clone() : taskConfig;
                 	TaskExecutor taskExecutor = new TaskExecutor(taskConfigForRun, attemptCount);
                     taskStartTimeMap.put(taskId, System.currentTimeMillis());
+
+                    //启动task线程执行read, write 操作
                 	taskExecutor.doStart();
 
                     iterator.remove();

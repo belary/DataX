@@ -57,7 +57,7 @@ public class HdfsReader extends Reader {
             this.readerOriginConfig.getNecessaryValue(Key.DEFAULT_FS,
                     HdfsReaderErrorCode.DEFAULT_FS_NOT_FIND_ERROR);
 
-            // path check
+            // 检查hdfs路径配置是否有效
             String pathInString = this.readerOriginConfig.getNecessaryValue(Key.PATH, HdfsReaderErrorCode.REQUIRED_VALUE);
             if (!pathInString.startsWith("[") && !pathInString.endsWith("]")) {
                 path = new ArrayList<String>();
@@ -76,6 +76,7 @@ public class HdfsReader extends Reader {
                 }
             }
 
+            // 检查hdfs的文件格式是否有效并设置默认值
             specifiedFileType = this.readerOriginConfig.getNecessaryValue(Key.FILETYPE, HdfsReaderErrorCode.REQUIRED_VALUE);
             if( !specifiedFileType.equalsIgnoreCase(Constant.ORC) &&
                     !specifiedFileType.equalsIgnoreCase(Constant.TEXT) &&
@@ -87,6 +88,7 @@ public class HdfsReader extends Reader {
                 throw DataXException.asDataXException(HdfsReaderErrorCode.FILE_TYPE_ERROR, message);
             }
 
+            // hdfs文件格式编码
             encoding = this.readerOriginConfig.getString(com.alibaba.datax.plugin.unstructuredstorage.reader.Key.ENCODING, "UTF-8");
 
             try {

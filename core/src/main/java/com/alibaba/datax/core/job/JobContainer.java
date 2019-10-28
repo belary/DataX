@@ -399,7 +399,7 @@ public class JobContainer extends AbstractContainer {
         List<Configuration> transformerList = this.configuration.getListConfiguration(CoreConstant.DATAX_JOB_CONTENT_TRANSFORMER);
 
         LOG.debug("transformer configuration: "+ JSON.toJSONString(transformerList));
-        /**
+        /*
          * 输入是reader和writer的parameter list，输出是content下面元素的list
          */
         List<Configuration> contentConfig = mergeReaderAndWriterTaskConfigs(
@@ -490,7 +490,7 @@ public class JobContainer extends AbstractContainer {
      * 同时不同的执行模式调用不同的调度策略，将所有任务调度起来
      */
     private void schedule() {
-        /**
+        /*
          * 这里的全局speed和每个channel的速度设置为B/s
          */
         int channelsPerTaskGroup = this.configuration.getInt(
@@ -501,7 +501,7 @@ public class JobContainer extends AbstractContainer {
         this.needChannelNumber = Math.min(this.needChannelNumber, taskNumber);
         PerfTrace.getInstance().setChannelNumber(needChannelNumber);
 
-        /**
+        /*
          * 通过获取配置信息得到每个taskGroup需要运行哪些tasks任务
          */
 
@@ -532,6 +532,7 @@ public class JobContainer extends AbstractContainer {
 
             this.startTransferTimeStamp = System.currentTimeMillis();
 
+            // 启动分组后的task
             scheduler.schedule(taskGroupConfigs);
 
             this.endTransferTimeStamp = System.currentTimeMillis();

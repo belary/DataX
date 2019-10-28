@@ -38,18 +38,21 @@ public class Engine {
     /* check job model (job/task) first */
     public void start(Configuration allConf) {
 
-        // 绑定column转换信息
+        /*
+         * 绑定column转换信息 设置日期、时间的格式、时区的默认值
+         */
         ColumnCast.bind(allConf);
 
-        /**
+        /*
          * 初始化PluginLoader，可以获取各种插件配置
          */
         LoadUtil.bind(allConf);
 
         boolean isJob = !("taskGroup".equalsIgnoreCase(allConf
                 .getString(CoreConstant.DATAX_CORE_CONTAINER_MODEL)));
+
         //JobContainer会在schedule后再行进行设置和调整值
-        int channelNumber =0;
+        int channelNumber = 0;
         AbstractContainer container;
         long instanceId;
         int taskGroupId = -1;
@@ -100,6 +103,7 @@ public class Engine {
 
         Configuration jobContent = jobConfWithSetting.getConfiguration("content");
 
+        //过滤配置文件中的敏感信息
         filterSensitiveConfiguration(jobContent);
 
         jobConfWithSetting.set("content",jobContent);
@@ -149,6 +153,7 @@ public class Engine {
             jobId = parseJobIdFromUrl(patternStringList, jobPath);
         }
 
+        //单机模式 jobId为-1，单机模式参数检验
         boolean isStandAloneMode = "standalone".equalsIgnoreCase(RUNTIME_MODE);
         if (!isStandAloneMode && jobId == -1) {
             // 如果不是 standalone 模式，那么 jobId 一定不能为-1
@@ -166,6 +171,7 @@ public class Engine {
 
         LOG.debug(configuration.toJSON());
 
+        // 验证并执行job 的配置
         ConfigurationValidate.doValidate(configuration);
         Engine engine = new Engine();
         engine.start(configuration);

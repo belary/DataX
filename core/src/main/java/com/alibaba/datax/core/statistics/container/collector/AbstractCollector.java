@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * task job 的配置信息收集器
+ */
 public abstract class AbstractCollector {
     private Map<Integer, Communication> taskCommunicationMap = new ConcurrentHashMap<Integer, Communication>();
     private Long jobId;
