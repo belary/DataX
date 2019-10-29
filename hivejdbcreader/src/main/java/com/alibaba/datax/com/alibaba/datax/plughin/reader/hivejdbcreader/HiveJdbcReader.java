@@ -122,29 +122,40 @@ public class HiveJdbcReader {
 
         @Override
         public void prepare() {
-            //创建临时Hive表,指定存储地址
+
+            /**    0. 创建HIVE临时表，通过配置文件指定外部表的字段类型
+              *    1. 通过HQL将查询结果导入到临时表中
+             */
+
 
 
         }
 
         @Override
         public void startRead(RecordSender recordSender) {
-            //读取临时hive表的hdfs文件
+
+            /**
+             * 读取Hive外部表
+             */
 
             LOG.info("end read source files...");
+
         }
 
 
-        //只是局部post  属于每个task
         @Override
         public void post() {
+            /**
+             *  读取完成以后这里可以放置一些校验工作
+             */
             LOG.info("one task hive read post...");
-            deleteTmpTable();
+            deleteHiveExternalTableAndS3Files();
         }
 
-        private void deleteTmpTable() {
-
-
+        /**
+         * 删除外部表格和相关的S3文件
+         */
+        private void deleteHiveExternalTableAndS3Files() {
 
         }
 

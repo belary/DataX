@@ -18,13 +18,12 @@ import java.util.List;
 /**
  * @author fanchao on 2019/10/18.
  * @version v0.1
- * @desc hive jdbc reader
+ * @desc s3上传工具类
  */
 
 public class S3Util {
 
     private static AmazonS3 s3Client;
-    private static Regions clientRegion;
     private static String bucketName;
     private static final Logger LOG = LoggerFactory.getLogger(S3Util.class);
 
@@ -32,7 +31,8 @@ public class S3Util {
     static
     {
         try {
-            clientRegion = Regions.CN_NORTHWEST_1;
+            // 默认目前的S3桶位于宁夏 可能以后会发生改变
+            Regions clientRegion = Regions.CN_NORTHWEST_1;
             bucketName = "data-archive-ningxia";
             s3Client = AmazonS3ClientBuilder.standard()
                     .withCredentials(new ProfileCredentialsProvider())
@@ -51,19 +51,16 @@ public class S3Util {
     }
 
     // 获取存储对象列表
-    // 默认目前的S3桶位于宁夏 可能以后会发生改变
-    // todo: bucket走配置文件
     public static ObjectListing listObj(String prefix){
 
-        ObjectListing list = s3Client.listObjects(new ListObjectsRequest()
+        return s3Client.listObjects(new ListObjectsRequest()
                 .withBucketName(bucketName)
                 .withPrefix(prefix));
-        return list;
     }
 
     // 上传本地文件到s3
     // 默认上传分段为5MB
-    public static void uploadObj(String keyName, String filePath) {
+    static void uploadObj(String keyName, String filePath) {
 
         String  stringObjKeyName = keyName;
         File file = new File(filePath);

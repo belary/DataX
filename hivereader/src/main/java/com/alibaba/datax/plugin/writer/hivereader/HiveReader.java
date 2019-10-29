@@ -78,16 +78,14 @@ public class HiveReader {
 
         @Override
         public List<Configuration> split(int adviceNumber) {
-            //按照Hive  sql的个数 获取配置文件的个数
+            //按照Hive sql的个数 获取配置文件的个数
             LOG.info("split() begin...");
             List<String> sqls = this.readerOriginConfig.getList(Key.HIVE_SQL, String.class);
             List<Configuration> readerSplitConfigs = new ArrayList<Configuration>();
             Configuration splitedConfig = null;
             for (String querySql : sqls) {
                 splitedConfig = this.readerOriginConfig.clone();
-
                 splitedConfig.set(Key.HIVE_SQL, querySql);
-
                 readerSplitConfigs.add(splitedConfig);
             }
             return readerSplitConfigs;
@@ -143,7 +141,10 @@ public class HiveReader {
 
         @Override
         public void prepare() {
-            //创建临时Hive表,指定存储地址
+
+            //创建临时Hive外部表
+            // 1. 通过配置文件指定外部表的字段类型
+            // 2. 通过S3上传获取外部表所关联的LOCATION地址
 
             tableName = hiveTableName();
             String hiveCmd = "create table " + tableName + " LOCATION '" + tmpPath + "' as " + hiveSql;
