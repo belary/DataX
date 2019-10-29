@@ -514,6 +514,7 @@ public class JobContainer extends AbstractContainer {
         AbstractScheduler scheduler;
         try {
         	executeMode = ExecuteMode.STANDALONE;
+        	LOG.info("主线程将开始启动StandaloneScheduler");
             scheduler = initStandaloneScheduler(this.configuration);
 
             //设置 executeMode

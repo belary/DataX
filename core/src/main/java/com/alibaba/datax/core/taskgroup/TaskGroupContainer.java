@@ -76,6 +76,9 @@ public class TaskGroupContainer extends AbstractContainer {
                 CoreConstant.DATAX_CORE_STATISTICS_COLLECTOR_PLUGIN_TASKCLASS);
     }
 
+    /**
+     * communicator的初始化
+     */
     private void initCommunicator(Configuration configuration) {
         super.setContainerCommunicator(new StandaloneTGContainerCommunicator(configuration));
 
@@ -126,7 +129,8 @@ public class TaskGroupContainer extends AbstractContainer {
                 LOG.debug("taskGroup[{}]'s task configs[{}]", this.taskGroupId,
                         JSON.toJSONString(taskConfigs));
             }
-            
+
+            // 该group所持有的task数量
             int taskCountInThisTaskGroup = taskConfigs.size();
             LOG.info(String.format(
                     "taskGroupId=[%d] start [%d] channels for [%d] tasks.",
@@ -144,21 +148,32 @@ public class TaskGroupContainer extends AbstractContainer {
             Communication lastTaskGroupContainerCommunication = new Communication();
 
             while (true) {
+
             	//1.判断task状态
             	boolean failedOrKilled = false;
             	Map<Integer, Communication> communicationMap = containerCommunicator.getCommunicationMap();
+
             	for(Map.Entry<Integer, Communication> entry : communicationMap.entrySet()){
+
+            	    // 逐个遍历task信息
             		Integer taskId = entry.getKey();
             		Communication taskCommunication = entry.getValue();
+
+                    // 如果task为
+                    // SUBMITTING || WAITING || RUNNING || KILLING  这几种状态
+                    // 则遍历下一个task
                     if(!taskCommunication.isFinished()){
                         continue;
                     }
+
+                    // 若状态为SUCCEEDED || FAILED || KILLED 三种情况视为task结束
                     TaskExecutor taskExecutor = removeTask(runTasks, taskId);
 
                     //上面从runTasks里移除了，因此对应在monitor里移除
                     taskMonitor.removeTask(taskId);
 
-                    //失败，看task是否支持failover，重试次数未超过最大限制
+                    // FAILED状态处理子过程
+                    // 失败，看task是否支持failover，重试次数未超过最大限制
             		if(taskCommunication.getState() == State.FAILED){
                         taskFailedExecutorMap.put(taskId, taskExecutor);
             			if(taskExecutor.supportFailOver() && taskExecutor.getAttemptCount() < taskMaxRetryTimes){
@@ -170,10 +185,14 @@ public class TaskGroupContainer extends AbstractContainer {
             				failedOrKilled = true;
                 			break;
             			}
-            		}else if(taskCommunication.getState() == State.KILLED){
+            		}
+                    // KILLED状态处理子过程
+            		else if(taskCommunication.getState() == State.KILLED){
             			failedOrKilled = true;
             			break;
-            		}else if(taskCommunication.getState() == State.SUCCEEDED){
+            		}
+                    // 若状态为SUCCEEDED状态处理子过程
+            		else if(taskCommunication.getState() == State.SUCCEEDED){
                         Long taskStartTime = taskStartTimeMap.get(taskId);
                         if(taskStartTime != null){
                             Long usedTime = System.currentTimeMillis() - taskStartTime;
@@ -186,7 +205,7 @@ public class TaskGroupContainer extends AbstractContainer {
                         }
                     }
             	}
-            	
+
                 // 2.发现该taskGroup下taskExecutor的总状态失败则汇报错误
                 if (failedOrKilled) {
                     lastTaskGroupContainerCommunication = reportTaskGroupCommunication(
@@ -195,14 +214,16 @@ public class TaskGroupContainer extends AbstractContainer {
                     throw DataXException.asDataXException(
                             FrameworkErrorCode.PLUGIN_RUNTIME_ERROR, lastTaskGroupContainerCommunication.getThrowable());
                 }
-                
+
                 //3.有任务未执行，且正在运行的任务数小于最大通道限制
                 Iterator<Configuration> iterator = taskQueue.iterator();
                 while(iterator.hasNext() && runTasks.size() < channelNumber){
+
                     Configuration taskConfig = iterator.next();
                     Integer taskId = taskConfig.getInt(CoreConstant.TASK_ID);
                     int attemptCount = 1;
                     TaskExecutor lastExecutor = taskFailedExecutorMap.get(taskId);
+
                     if(lastExecutor!=null){
                         attemptCount = lastExecutor.getAttemptCount() + 1;
                         long now = System.currentTimeMillis();
@@ -212,6 +233,8 @@ public class TaskGroupContainer extends AbstractContainer {
                         }
                         if(!lastExecutor.isShutdown()){ //上次失败的task仍未结束
                             if(now - failedTime > taskMaxWaitInMsec){
+
+                                // 通过设置communication中的状态为失败来标记该task状态
                                 markCommunicationFailed(taskId);
                                 reportTaskGroupCommunication(lastTaskGroupContainerCommunication, taskCountInThisTaskGroup);
                                 throw DataXException.asDataXException(CommonErrorCode.WAIT_TIME_EXCEED, "task failover等待超时");
@@ -224,15 +247,21 @@ public class TaskGroupContainer extends AbstractContainer {
                                     this.taskGroupId, taskId, lastExecutor.getAttemptCount());
                         }
                     }
-                    // task执行线程生成和初始化该线程的配置数据（主要是reader|writer的配置)
+
+                    // task执行线程生成和初始化该线程的配置数据（reader|writer的配置)
+                    // 如果存在重试则使用clone的原始task配置（重试后的配置会变更？）
                     Configuration taskConfigForRun = taskMaxRetryTimes > 1 ? taskConfig.clone() : taskConfig;
                 	TaskExecutor taskExecutor = new TaskExecutor(taskConfigForRun, attemptCount);
                     taskStartTimeMap.put(taskId, System.currentTimeMillis());
 
-                    //启动task线程执行read, write 操作
+                    // 启动task线程执行read, write 操作
+                    // 将中间信息写入taskCommunicator
                 	taskExecutor.doStart();
 
+                	// 开启task线程后，从task队列移除该task
                     iterator.remove();
+
+                    // 将该task执行器加入到runTasks列表
                     runTasks.add(taskExecutor);
 
                     //上面，增加task到runTasks列表，因此在monitor里注册。

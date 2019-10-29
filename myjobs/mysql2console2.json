@@ -19,7 +19,7 @@
                                     "select distinct DATE_FORMAT(created_at,'%Y%m%d')  as  pday, did from jf_play where aid=14 and DATE_FORMAT(created_at,'%Y%m%d')='20191017' group by DATE_FORMAT(created_at,'%Y%m%d'), did order by DATE_FORMAT(created_at,'%Y%m%d')"
                                 ],
                                 "jdbcUrl": [
-                                    "jdbc:mysql://10.100.1.77:7028/laxin"
+                                    "jdbc:mysql://10.100.1.37:7028/laxin"
                                 ]
                             }
                         ]
