@@ -174,7 +174,7 @@ public class TaskGroupContainer extends AbstractContainer {
 
                     // FAILED状态处理子过程
                     // 失败，看task是否支持failover，重试次数未超过最大限制
-            		if(taskCommunication.getState() == State.FAILED){
+            		if(taskCommunication.getState() == State.FAILED) {
                         taskFailedExecutorMap.put(taskId, taskExecutor);
             			if(taskExecutor.supportFailOver() && taskExecutor.getAttemptCount() < taskMaxRetryTimes){
                             taskExecutor.shutdown(); //关闭老的executor
