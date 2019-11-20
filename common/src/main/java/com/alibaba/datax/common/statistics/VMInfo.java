@@ -337,9 +337,9 @@ public class VMInfo {
                 sb.append("\t\t ");
                 sb.append(String.format("%-30s | %-30s | %-30s | %-30s | %-30s \n",
                         ms.name, String.format("%,.2f", (float) ms.usedSize / MB) + "MB",
-                        String.format("%,.2f", (float) ms.percent) + "%",
+                        String.format("%,.2f", ms.percent) + "%",
                         String.format("%,.2f", (float) ms.maxUsedSize / MB) + "MB",
-                        String.format("%,.2f", (float) ms.maxpercent) + "%"));
+                        String.format("%,.2f", ms.maxpercent) + "%"));
 
             }
             return sb.toString();

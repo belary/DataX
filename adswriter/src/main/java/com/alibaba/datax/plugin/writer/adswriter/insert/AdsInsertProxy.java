@@ -403,10 +403,7 @@ public class AdsInsertProxy implements AdsProxy {
         if (meetExceptionClass == com.mysql.jdbc.exceptions.jdbc4.CommunicationsException.class) {
             return true;
         }
-        if (meetExceptionClass == java.net.SocketException.class) {
-            return true;
-        }
-        return false;
+        return meetExceptionClass == java.net.SocketException.class;
     }
 
     private String generateDmlSql(Connection connection, Record record, String mode) throws SQLException {

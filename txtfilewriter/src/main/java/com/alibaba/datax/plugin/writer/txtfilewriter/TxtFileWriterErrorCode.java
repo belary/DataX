@@ -17,7 +17,7 @@ public enum TxtFileWriterErrorCode implements ErrorCode {
     private final String code;
     private final String description;
 
-    private TxtFileWriterErrorCode(String code, String description) {
+    TxtFileWriterErrorCode(String code, String description) {
         this.code = code;
         this.description = description;
     }

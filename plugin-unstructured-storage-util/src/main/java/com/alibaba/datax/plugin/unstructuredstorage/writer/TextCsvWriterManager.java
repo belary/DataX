@@ -44,7 +44,7 @@ class CsvWriterImpl implements UnstructuredWriter {
         if (splitedRows.isEmpty()) {
             LOG.info("Found one record line which is empty.");
         }
-        this.csvWriter.writeRecord((String[]) splitedRows
+        this.csvWriter.writeRecord(splitedRows
                 .toArray(new String[0]));
     }
 

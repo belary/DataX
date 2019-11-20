@@ -177,13 +177,29 @@ def buildStartCommand(options, args):
         commandMap["mode"] = options.mode
 
     # jobResource 可能是 URL，也可能是本地文件路径（相对,绝对）
+
     jobResource = args[0]
     if not isUrl(jobResource):
         jobResource = os.path.abspath(jobResource)
         if jobResource.lower().startswith("file://"):
             jobResource = jobResource[len("file://"):]
 
-    jobParams = ("-Dlog.file.name=%s") % (jobResource[-20:].replace('/', '_').replace('.', '_'))
+
+    # 获取配置文件全路径中的最后20个字符作为日志文件的名称有点不妥
+    # 当使用当前用户目录标识符～,会拼接为/Users/fanchao/~/xxx而不是正确的路径 /Users/fanchao/xxx
+    # e.g.
+    # >>> jobResource='~/project/java/DataX/myjobs/my2my.json'
+    # >>> jobResource = os.path.abspath(jobResource)
+    # >>> print(jobResource)
+    # /Users/fanchao/~/project/java/DataX/myjobs/my2my.json
+
+    # fix begin on 2019-11-15
+    if jobResource.rindex('/') > 0:
+        jobParams = ("-Dlog.file.name=%s") % (jobResource[jobResource.rindex('/')+1:].replace('/', '_').replace('.', '_'))
+    else:
+        jobParams = ("-Dlog.file.name=%s") % (jobResource[-20:].replace('/', '_').replace('.', '_'))
+    # fix end on 2019-11-15
+
     if options.params:
         jobParams = jobParams + " " + options.params
 

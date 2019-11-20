@@ -7,7 +7,7 @@ import java.sql.Connection;
  * @author yuncheng
  */
 public interface AdbProxy {
-    public abstract void startWriteWithConnection(RecordReceiver recordReceiver, Connection connection);
+    void startWriteWithConnection(RecordReceiver recordReceiver, Connection connection);
 
-    public void closeResource();
+    void closeResource();
 }

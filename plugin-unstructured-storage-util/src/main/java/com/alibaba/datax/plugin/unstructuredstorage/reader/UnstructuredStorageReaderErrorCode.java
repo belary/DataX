@@ -22,7 +22,7 @@ public enum UnstructuredStorageReaderErrorCode implements ErrorCode {
 	private final String code;
 	private final String description;
 
-	private UnstructuredStorageReaderErrorCode(String code, String description) {
+	UnstructuredStorageReaderErrorCode(String code, String description) {
 		this.code = code;
 		this.description = description;
 	}

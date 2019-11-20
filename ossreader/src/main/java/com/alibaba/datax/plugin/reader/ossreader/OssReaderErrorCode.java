@@ -22,7 +22,7 @@ public enum OssReaderErrorCode implements ErrorCode {
     private final String code;
     private final String description;
 
-    private OssReaderErrorCode(String code, String description) {
+    OssReaderErrorCode(String code, String description) {
         this.code = code;
         this.description = description;
     }

@@ -1,0 +1,6 @@
+{
+    "name": "hivejdbcreader",
+    "class": "com.alibaba.datax.plugin.reader.hivejdbcreader.HiveJdbcReader",
+    "description": "useScene: prod. mechanism: via FileSystem connect HDFS write data concurrent.",
+    "developer": "mgtv"
+}

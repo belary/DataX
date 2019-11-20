@@ -50,7 +50,7 @@ public class SubstrTransformer extends Transformer {
                 throw new RuntimeException(String.format("dx_substr startIndex(%s) out of range(%s)", startIndex, oriValue.length()));
             }
             if (startIndex + length >= oriValue.length()) {
-                newValue = oriValue.substring(startIndex, oriValue.length());
+                newValue = oriValue.substring(startIndex);
             } else {
                 newValue = oriValue.substring(startIndex, startIndex + length);
             }

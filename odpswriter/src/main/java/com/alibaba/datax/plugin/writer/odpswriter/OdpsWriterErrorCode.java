@@ -43,7 +43,7 @@ public enum OdpsWriterErrorCode implements ErrorCode {
     private final String code;
     private final String description;
 
-    private OdpsWriterErrorCode(String code, String description) {
+    OdpsWriterErrorCode(String code, String description) {
         this.code = code;
         this.description = description;
     }

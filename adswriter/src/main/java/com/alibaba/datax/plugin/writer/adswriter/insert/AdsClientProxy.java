@@ -39,7 +39,7 @@ public class AdsClientProxy implements AdsProxy {
     // columnName: <java sql type, ads type name>
     private Map<String, Pair<Integer, String>> adsTableColumnsMetaData;
     private Map<String, Pair<Integer, String>> userConfigColumnsMetaData;
-    private boolean useRawData[];
+    private boolean[] useRawData;
 
     private AdbClient adbClient;
 

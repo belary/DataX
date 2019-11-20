@@ -53,7 +53,7 @@ public class ReplaceTransformer extends Transformer {
             if (startIndex + length >= oriValue.length()) {
                 newValue = oriValue.substring(0, startIndex) + replaceString;
             } else {
-                newValue = oriValue.substring(0, startIndex) + replaceString + oriValue.substring(startIndex + length, oriValue.length());
+                newValue = oriValue.substring(0, startIndex) + replaceString + oriValue.substring(startIndex + length);
             }
 
             record.setColumn(columnIndex, new StringColumn(newValue));

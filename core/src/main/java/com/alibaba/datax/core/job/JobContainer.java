@@ -617,12 +617,12 @@ public class JobContainer extends AbstractContainer {
                 dateFormat.format(endTimeStamp),
 
                 "任务总计耗时",
-                String.valueOf(totalCosts) + "s",
+                totalCosts + "s",
                 "任务平均流量",
                 StrUtil.stringify(byteSpeedPerSecond)
                         + "/s",
                 "记录写入速度",
-                String.valueOf(recordSpeedPerSecond)
+                recordSpeedPerSecond
                         + "rec/s", "读出记录总数",
                 String.valueOf(CommunicationTool.getTotalReadRecords(communication)),
                 "读写失败总数",

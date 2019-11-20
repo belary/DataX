@@ -1,4 +1,4 @@
-package com.alibaba.datax.com.alibaba.datax.plughin.reader.hivejdbcreader;
+package com.alibaba.datax.plugin.reader.hivejdbcreader;
 
 import com.alibaba.datax.common.spi.ErrorCode;
 
@@ -11,19 +11,13 @@ public enum HiveJdbcReaderErrorCode implements ErrorCode {
     CONFIG_INVALID_EXCEPTION("HiveReader-04", "参数配置错误"),
     REQUIRED_VALUE("HiveReader-05", "您缺失了必须填写的参数值."),
     SCRIPT_ERROR("HiveReader-06", "hive 脚本执行失败."),
-    PATH_CONFIG_ERROR("HdfsReader-09", "您配置的path格式有误"),
-    READ_FILE_ERROR("HdfsReader-10", "读取文件出错"),
-    FILE_TYPE_UNSUPPORT("HdfsReader-12", "文件类型目前不支持"),
-    KERBEROS_LOGIN_ERROR("HdfsReader-13", "KERBEROS认证失败"),
-    READ_SEQUENCEFILE_ERROR("HdfsReader-14", "读取SequenceFile文件出错"),
-    READ_RCFILE_ERROR("HdfsReader-15", "读取RCFile文件出错"),;
-    ;
+    UNSUPPORTED_TYPE("HiveReader-07", "不支持的数据库类型. 请注意查看 DataX 已经支持的数据库类型以及数据库版本."),;
 
 
     private final String code;
     private final String description;
 
-    private HiveJdbcReaderErrorCode(String code, String description) {
+    HiveJdbcReaderErrorCode(String code, String description) {
         this.code = code;
         this.description = description;
     }

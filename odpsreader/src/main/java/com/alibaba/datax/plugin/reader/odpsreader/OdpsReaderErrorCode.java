@@ -37,7 +37,7 @@ public enum OdpsReaderErrorCode implements ErrorCode {
     private final String code;
     private final String description;
 
-    private OdpsReaderErrorCode(String code, String description) {
+    OdpsReaderErrorCode(String code, String description) {
         this.code = code;
         this.description = description;
     }

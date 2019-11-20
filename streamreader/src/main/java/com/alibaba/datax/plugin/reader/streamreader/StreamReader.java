@@ -288,10 +288,10 @@ public class StreamReader extends Reader {
                         return new BoolColumn(false);
                     } else {
                         long randomInt = RandomUtils.nextLong(0, param1Int + param2Int + 1);
-                        return new BoolColumn(randomInt <= param1Int ? false : true);
+                        return new BoolColumn(randomInt > param1Int);
                     }
                 } else {
-                    return new BoolColumn("true".equalsIgnoreCase(columnValue) ? true : false);
+                    return new BoolColumn("true".equalsIgnoreCase(columnValue));
                 }
             case BYTES:
                 if (isColumnMixup) {

@@ -8,7 +8,7 @@ public enum SqlServerReaderErrorCode implements ErrorCode {
     private String code;
     private String description;
 
-    private SqlServerReaderErrorCode(String code, String description) {
+    SqlServerReaderErrorCode(String code, String description) {
         this.code = code;
         this.description = description;
     }

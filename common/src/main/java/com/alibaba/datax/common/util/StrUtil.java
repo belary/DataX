@@ -45,7 +45,7 @@ public class StrUtil {
         } else if (byteNumber / KB_IN_BYTES > 0) {
             return df.format((double) byteNumber / (double) KB_IN_BYTES) + "KB";
         } else {
-            return String.valueOf(byteNumber) + "B";
+            return byteNumber + "B";
         }
     }
 

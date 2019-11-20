@@ -1,4 +1,4 @@
-package com.alibaba.datax.com.alibaba.datax.plughin.reader.hivejdbcreader;
+package com.alibaba.datax.plugin.reader.hivejdbcreader;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;

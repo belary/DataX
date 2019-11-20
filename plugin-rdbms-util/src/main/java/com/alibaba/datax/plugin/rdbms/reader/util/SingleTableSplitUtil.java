@@ -369,8 +369,8 @@ public class SingleTableSplitUtil {
                 // warn: treated as string type
                 String[] stringPoints = new String[splitedRange.size()];
                 for (int i = 0; i < splitedRangeSize; i++) {
-                    stringPoints[i] = new String(splitedRange.get(i).getLeft()
-                            .toString());
+                    stringPoints[i] = splitedRange.get(i).getLeft()
+                            .toString();
                 }
                 rangeSql.addAll(RdbmsRangeSplitWrap.wrapRange(stringPoints,
                         splitPK, "'", DATABASE_TYPE));

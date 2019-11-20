@@ -22,7 +22,7 @@ public enum AdsWriterErrorCode implements ErrorCode {
     private String adsAccount;
 
 
-    private AdsWriterErrorCode(String code, String description) {
+    AdsWriterErrorCode(String code, String description) {
         this.code = code;
         this.description = description;
     }

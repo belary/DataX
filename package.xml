@@ -24,6 +24,15 @@
             <outputDirectory>datax</outputDirectory>
         </fileSet>
 
+        <!-- by fc on 2019-11-19 -->
+        <fileSet>
+            <directory>hivejdbcreader/target/datax/</directory>
+            <includes>
+                <include>**/*.*</include>
+            </includes>
+            <outputDirectory>datax</outputDirectory>
+        </fileSet>
+
         <!-- reader -->
         <fileSet>
             <directory>mysqlreader/target/datax/</directory>

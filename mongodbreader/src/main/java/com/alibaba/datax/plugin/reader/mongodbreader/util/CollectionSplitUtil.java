@@ -56,10 +56,7 @@ public class CollectionSplitUtil {
         MongoCollection<Document> col = database.getCollection(collName);
         Document doc = col.find().limit(1).first();
         Object id = doc.get(KeyConstant.MONGO_PRIMARY_ID);
-        if (id instanceof ObjectId) {
-            return true;
-        }
-        return false;
+        return id instanceof ObjectId;
     }
 
     // split the collection into multiple chunks, each chunk specifies a range

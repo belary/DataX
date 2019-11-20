@@ -194,7 +194,7 @@ public final class DBUtil {
                 String[] params = grantRecord.split("\\`");
                 if (params != null && params.length >= 3) {
                     String tableName = params[3];
-                    if (params[0].contains("INSERT") && !tableName.equals("*") && tableNames.contains(tableName))
+                    if (params[0].contains("INSERT") && !tableName.equals("*"))
                         tableNames.remove(tableName);
                 } else {
                     if (grantRecord.contains("INSERT") ||grantRecord.contains("ALL PRIVILEGES")) {
@@ -209,9 +209,7 @@ public final class DBUtil {
         } catch (Exception e) {
             LOG.warn("Check the database has the Insert Privilege failed, errorMessage:[{}]", e.getMessage());
         }
-        if (tableNames.isEmpty())
-            return true;
-        return false;
+        return tableNames.isEmpty();
     }
 
 
@@ -587,7 +585,7 @@ public final class DBUtil {
         try {
             connection = connect(dataBaseType, url, user, pass);
             if (connection != null) {
-                if (dataBaseType.equals(dataBaseType.MySql) && checkSlave) {
+                if (dataBaseType.equals(DataBaseType.MySql) && checkSlave) {
                     //dataBaseType.MySql
                     boolean connOk = !isSlaveBehind(connection);
                     return connOk;

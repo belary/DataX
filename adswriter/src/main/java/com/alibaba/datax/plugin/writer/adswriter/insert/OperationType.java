@@ -4,7 +4,7 @@ public enum OperationType {
     // i: insert uo:before image uu:before image un: after image d: delete
     // u:update
     I("i"), UO("uo"), UU("uu"), UN("un"), D("d"), U("u"), UNKNOWN("unknown"), ;
-    private OperationType(String type) {
+    OperationType(String type) {
         this.type = type;
     }
 

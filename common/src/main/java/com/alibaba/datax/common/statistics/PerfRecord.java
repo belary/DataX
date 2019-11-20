@@ -176,8 +176,7 @@ public class PerfRecord implements Comparable<PerfRecord> {
         if (this.taskGroupId != dst.taskGroupId) return false;
         if (this.taskId != dst.taskId) return false;
         if (phase != null ? !phase.equals(dst.phase) : dst.phase != null) return false;
-        if (startTime != null ? !startTime.equals(dst.startTime) : dst.startTime != null) return false;
-        return true;
+        return startTime != null ? startTime.equals(dst.startTime) : dst.startTime == null;
     }
 
     public PerfRecord copy() {

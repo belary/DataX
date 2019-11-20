@@ -14,7 +14,6 @@ import com.alibaba.datax.plugin.rdbms.util.DBUtilErrorCode;
 import com.alibaba.datax.plugin.writer.adbpgwriter.util.Adb4pgUtil;
 import com.alibaba.datax.plugin.writer.adbpgwriter.util.Constant;
 import com.alibaba.datax.plugin.writer.adbpgwriter.util.Key;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +33,7 @@ public class Adb4pgClientProxy implements AdbProxy {
     List<String> columns;
     private TableInfo tableInfo;
     private TaskPluginCollector taskPluginCollector;
-    private boolean useRawData[];
+    private boolean[] useRawData;
     public Adb4pgClientProxy(Configuration configuration,TaskPluginCollector  taskPluginCollector) {
         this.taskPluginCollector = taskPluginCollector;
 

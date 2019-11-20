@@ -345,11 +345,8 @@ public class ColumnDataType {
      * @return true if the value type is a String type
      */
     public static boolean isStringType(int type) {
-        if (type == STRING /* || type == STRING_FIXED || type == STRING_IGNORECASE */
-                || type == MULTI_VALUE) {
-            return true;
-        }
-        return false;
+        return type == STRING /* || type == STRING_FIXED || type == STRING_IGNORECASE */
+                || type == MULTI_VALUE;
     }
 
     /**

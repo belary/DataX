@@ -558,11 +558,7 @@ public class TaskGroupContainer extends AbstractContainer {
                 return false;
             }
 
-            if(taskCommunication==null || !taskCommunication.isFinished()){
-        		return false;
-        	}
-
-            return true;
+            return taskCommunication != null && taskCommunication.isFinished();
         }
         
         private int getTaskId(){

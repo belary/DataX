@@ -9,7 +9,7 @@ public enum PluginType {
 
     private String pluginType;
 
-    private PluginType(String pluginType) {
+    PluginType(String pluginType) {
         this.pluginType = pluginType;
     }
 

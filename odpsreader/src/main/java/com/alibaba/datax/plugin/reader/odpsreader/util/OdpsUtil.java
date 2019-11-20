@@ -232,12 +232,8 @@ public final class OdpsUtil {
     }
 
     public static boolean checkIfConstantColumn(String column) {
-        if (column.length() >= 2 && column.startsWith(Constant.COLUMN_CONSTANT_FLAG) &&
-                column.endsWith(Constant.COLUMN_CONSTANT_FLAG)) {
-            return true;
-        } else {
-            return false;
-        }
+        return column.length() >= 2 && column.startsWith(Constant.COLUMN_CONSTANT_FLAG) &&
+                column.endsWith(Constant.COLUMN_CONSTANT_FLAG);
     }
 
     public static TableTunnel.DownloadSession createMasterSessionForNonPartitionedTable(Odps odps, String tunnelServer,

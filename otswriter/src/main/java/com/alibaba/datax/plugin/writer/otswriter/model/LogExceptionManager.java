@@ -36,9 +36,8 @@ public class LogExceptionManager {
                 countAndReset();
             } else {
                 LOG.warn(
-                        "Call callable fail, OTSException:ErrorCode:{}, ErrorMsg:{}, RequestId:{}", 
-                        new Object[]{e.getErrorCode(), e.getMessage(), e.getRequestId()}
-                        );
+                        "Call callable fail, OTSException:ErrorCode:{}, ErrorMsg:{}, RequestId:{}",
+                        e.getErrorCode(), e.getMessage(), e.getRequestId());
             }
         } else {
             LOG.warn("Call callable fail, {}", exception.getMessage());
@@ -50,9 +49,8 @@ public class LogExceptionManager {
             countAndReset();
         } else {
             LOG.warn(
-                    "OTSException:ErrorCode:{}, ErrorMsg:{}, RequestId:{}", 
-                    new Object[]{error.getCode(), error.getMessage(), requestId}
-                    );
+                    "OTSException:ErrorCode:{}, ErrorMsg:{}, RequestId:{}",
+                    error.getCode(), error.getMessage(), requestId);
         }
     }
 }

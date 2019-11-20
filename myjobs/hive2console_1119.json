@@ -1,0 +1,32 @@
+{
+  "job": {
+    "content": [
+      {
+        "reader": {
+          "name": "hivejdbcreader",
+          "parameter": {
+            "hive_sql": [
+              "select * from fc.fc_desc limit 10"
+            ],
+            "conn_url": "jdbc:hive2://localhost:10000/fc",
+            "user_name": "fanchao",
+            "password": "fanchao"
+          }
+        },
+        "writer": {
+          "name": "streamwriter",
+          "parameter": {
+            "print": true,
+            "encoding": "UTF-8"
+          }
+        }
+      }
+    ],
+    "setting": {
+      "speed": {
+        "channel":2
+      }
+    }
+  }
+
+}

@@ -1,4 +1,4 @@
-package com.alibaba.datax.com.alibaba.datax.plughin.reader.hivejdbcreader;
+package com.alibaba.datax.plugin.reader.hivejdbcreader;
 
 /**
  * @author fanchao on 2019/10/18.

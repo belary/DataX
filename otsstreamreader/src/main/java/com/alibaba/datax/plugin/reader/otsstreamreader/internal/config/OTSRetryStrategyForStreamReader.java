@@ -29,25 +29,15 @@ public class OTSRetryStrategyForStreamReader implements RetryStrategy {
 
     private boolean canRetry(Exception ex) {
         if (ex instanceof TableStoreException) {
-            if (noRetryErrorCode.contains(((TableStoreException) ex).getErrorCode())) {
-                return false;
-            }
-            return true;
-        } else if (ex instanceof ClientException) {
-            return true;
-        } else {
-            return false;
-        }
+            return !noRetryErrorCode.contains(((TableStoreException) ex).getErrorCode());
+        } else return ex instanceof ClientException;
     }
 
     public boolean shouldRetry(String action, Exception ex, int retries) {
         if (retries > maxRetries) {
             return false;
         }
-        if (canRetry(ex)) {
-            return true;
-        }
-        return false;
+        return canRetry(ex);
     }
 
     public void setMaxRetries(int maxRetries) {

@@ -14,7 +14,7 @@ import com.alibaba.datax.common.exception.DataXException;
 public class StringColumn extends Column {
 
 	public StringColumn() {
-		this((String) null);
+		this(null);
 	}
 
 	public StringColumn(final String rawData) {

@@ -114,7 +114,7 @@ public class AdsUtil {
     public static String transferOdpsPartitionToAds(String odpsPartition){
         if(odpsPartition == null || odpsPartition.isEmpty())
             return null;
-        String adsPartition = formatPartition(odpsPartition);;
+        String adsPartition = formatPartition(odpsPartition);
         String[] partitions = adsPartition.split("/");
         for(int last = partitions.length; last > 0; last--){
 

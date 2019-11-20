@@ -405,9 +405,6 @@ public class Configuration {
 	@SuppressWarnings("unchecked")
 	public List<Object> getList(final String path) {
 		List<Object> list = this.get(path, List.class);
-		if (null == list) {
-			return null;
-		}
 		return list;
 	}
 
@@ -478,9 +475,6 @@ public class Configuration {
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> getMap(final String path) {
 		Map<String, Object> result = this.get(path, Map.class);
-		if (null == result) {
-			return null;
-		}
 		return result;
 	}
 
@@ -1017,11 +1011,7 @@ public class Configuration {
 	}
 
 	private boolean isSuitForRoot(final Object object) {
-		if (null != object && (object instanceof List || object instanceof Map)) {
-			return true;
-		}
-
-		return false;
+		return null != object && (object instanceof List || object instanceof Map);
 	}
 
 	private String split(final String path) {

@@ -14,7 +14,7 @@ public interface Hook {
      *
      * @return
      */
-    public String getName();
+    String getName();
 
     /**
      * TODO 文档
@@ -22,6 +22,6 @@ public interface Hook {
      * @param jobConf
      * @param msg
      */
-    public void invoke(Configuration jobConf, Map<String, Number> msg);
+    void invoke(Configuration jobConf, Map<String, Number> msg);
 
 }

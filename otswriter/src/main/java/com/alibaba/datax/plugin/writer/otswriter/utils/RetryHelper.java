@@ -55,11 +55,7 @@ public class RetryHelper {
     }
     
     public static boolean canRetry(String otsErrorCode) {
-        if (noRetryErrorCode.contains(otsErrorCode)) {
-            return false;
-        } else {
-            return true;
-        }
+        return !noRetryErrorCode.contains(otsErrorCode);
     }
     
     public static boolean canRetry(Exception exception) {
@@ -67,10 +63,6 @@ public class RetryHelper {
         if (exception instanceof OTSException) {
             e = (OTSException) exception;
             return canRetry(e.getErrorCode());
-        } else if (exception instanceof ClientException) {
-            return true;
-        } else {
-            return false;
-        } 
+        } else return exception instanceof ClientException;
     }
 }

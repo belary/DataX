@@ -14,7 +14,7 @@ public enum OcsWriterErrorCode implements ErrorCode {
     private final String code;
     private final String description;
 
-    private OcsWriterErrorCode(String code, String description) {
+    OcsWriterErrorCode(String code, String description) {
         this.code = code;
         this.description = description;
     }

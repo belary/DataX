@@ -1,0 +1,66 @@
+{
+    "job": {
+        "setting": {
+            "speed": {
+                 "channel":1
+            }
+        },
+        "content": [
+            {
+                "reader": {
+                    "name": "mysqlreader",
+                    "parameter": {
+                        "username": "person_rw",
+                        "password": "fdWUE89)3D*FdfWE43",
+                        "connection": [
+                            {
+                                "querySql": [
+                                    "select id,date,dau,oneDay,sevenDay,cdau,credits_coneDay,credits_csevenDay,credits_oneDay,credits_sevenDay,product,bid from AB_retain_daily where date<=20190201;"
+                                ],
+                                "jdbcUrl": [
+                                    "jdbc:mysql://10.100.10.22:3306/person"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "writer": {
+                    "name": "mysqlwriter",
+                    "parameter": {
+                        "writeMode": "insert",
+                        "username": "person_rw",
+                        "password": "fdWUE89)3D*FdfWE43",
+                        "column": [
+                            "id",
+                            "date",
+                            "dau",
+                            "oneDay",
+                            "sevenDay",
+                            "cdau",
+                            "credits_coneDay",
+                            "credits_csevenDay",
+                            "credits_oneDay",
+                            "credits_sevenDay",
+                            "product",
+                            "bid"
+                        ],
+                        "session": [
+                            "set session sql_mode='ANSI'"
+                        ],
+                        "preSql": [
+                            "delete from AB_retain_daily_copy"
+                        ],
+                        "connection": [
+                            {
+                                "jdbcUrl": "jdbc:mysql://10.100.10.22:3306/person",
+                                "table": [
+                                    "AB_retain_daily_copy"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    }
+}

@@ -73,7 +73,7 @@ public class OtsWriterMasterProxy {
         conf.setPrimaryKeyColumn(WriterModelParser.parseOTSPKColumnList(ParamChecker.checkListAndGet(param, Key.PRIMARY_KEY, true)));
         ParamChecker.checkPrimaryKey(meta, conf.getPrimaryKeyColumn());
         
-        conf.setAttributeColumn(WriterModelParser.parseOTSAttrColumnList(ParamChecker.checkListAndGet(param, Key.COLUMN, conf.getOperation() == OTSOpType.UPDATE_ROW ? true : false)));
+        conf.setAttributeColumn(WriterModelParser.parseOTSAttrColumnList(ParamChecker.checkListAndGet(param, Key.COLUMN, conf.getOperation() == OTSOpType.UPDATE_ROW)));
         ParamChecker.checkAttribute(conf.getAttributeColumn());
     }
     

@@ -31,7 +31,7 @@ public class LoadUtil {
         Job("Job"), Task("Task");
         private String type;
 
-        private ContainerType(String type) {
+        ContainerType(String type) {
             this.type = type;
         }
 
