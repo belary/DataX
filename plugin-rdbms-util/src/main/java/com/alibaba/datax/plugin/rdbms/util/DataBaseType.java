@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
  * <p/>
  */
 public enum DataBaseType {
+    Hive("hive", "org.apache.hive.jdbc.HiveDriver"),
     MySql("mysql", "com.mysql.jdbc.Driver"),
     Tddl("mysql", "com.mysql.jdbc.Driver"),
     DRDS("drds", "com.mysql.jdbc.Driver"),

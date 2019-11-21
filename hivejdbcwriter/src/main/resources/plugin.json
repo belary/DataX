@@ -1,0 +1,6 @@
+{
+    "name": "hivejdbcwriter",
+    "class": "com.alibaba.datax.plugin.reader.hivejdbcreader.HiveJdbcWriter",
+    "description": "useScene: prod. mechanism: via Hive connect write data concurrent.",
+    "developer": "mgtv"
+}

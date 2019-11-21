@@ -9,26 +9,15 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>hivejdbcreader</artifactId>
+    <artifactId>hivejdbcwriter</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <name>hivejdbcwriter</name>
     <packaging>jar</packaging>
     <properties>
         <hive.version>1.1.1</hive.version>
         <hadoop.version>3.1.2</hadoop.version>
     </properties>
 
-
-<!--    <dependencyManagement>-->
-<!--        <dependencies>-->
-<!--            <dependency>-->
-<!--                <groupId>com.amazonaws</groupId>-->
-<!--                <artifactId>aws-java-sdk-bom</artifactId>-->
-<!--                <version>1.11.543</version>-->
-<!--                <type>pom</type>-->
-<!--                <scope>import</scope>-->
-<!--            </dependency>-->
-<!--        </dependencies>-->
-<!--    </dependencyManagement>-->
 
     <dependencies>
 
@@ -56,14 +45,11 @@
         </dependency>
 
         <!-- hive jdbc begin-->
-
         <dependency>
             <groupId>org.apache.hive</groupId>
             <artifactId>hive-jdbc</artifactId>
             <version>3.1.2</version>
         </dependency>
-
-
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-common</artifactId>
@@ -74,7 +60,6 @@
             <artifactId>hadoop-hdfs</artifactId>
             <version>3.1.2</version>
         </dependency>
-
         <!-- hive jdbc end-->
 
 
@@ -83,26 +68,13 @@
             <artifactId>hadoop-client</artifactId>
             <version>3.1.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba.datax</groupId>
+            <artifactId>plugin-rdbms-util</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
 
-        <!-- s3 -->
-<!--        <dependency>-->
-<!--            <groupId>com.amazonaws</groupId>-->
-<!--            <artifactId>aws-java-sdk-s3</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.amazonaws</groupId>-->
-<!--            <artifactId>aws-java-sdk-sts</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.amazonaws</groupId>-->
-<!--            <artifactId>aws-java-sdk-iam</artifactId>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>org.bouncycastle</groupId>-->
-<!--            <artifactId>bcprov-jdk16</artifactId>-->
-<!--            <version>1.45</version>-->
-<!--        </dependency>-->
     </dependencies>
 
     <build>

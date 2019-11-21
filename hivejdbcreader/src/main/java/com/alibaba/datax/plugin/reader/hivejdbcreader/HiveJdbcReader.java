@@ -3,10 +3,9 @@ package com.alibaba.datax.plugin.reader.hivejdbcreader;
 import com.alibaba.datax.common.element.*;
 import com.alibaba.datax.common.exception.DataXException;
 import com.alibaba.datax.common.plugin.RecordSender;
+import com.alibaba.datax.common.plugin.TaskPluginCollector;
 import com.alibaba.datax.common.spi.Reader;
 import com.alibaba.datax.common.util.Configuration;
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,16 +69,21 @@ public class HiveJdbcReader extends Reader  {
 
         @Override
         public void prepare() {
+            LOG.info("hive jdbc reader job prepare 方法执行");
 
         }
 
+
         @Override
         public List<Configuration> split(int adviceNumber) {
+
             //按照Hive sql的个数 获取配置文件的个数
             LOG.info("分批查询HIVE开始");
             List<String> sqls = this.readerOriginConfig.getList(Key.HIVE_SQL, String.class);
             List<Configuration> readerSplitConfigs = new ArrayList<Configuration>();
             Configuration splitedConfig = null;
+
+            // 一个查询语句返回一份配置，对应一个拆分，对应一组reader-writer线程足
             for (String querySql : sqls) {
                 splitedConfig = this.readerOriginConfig.clone();
                 splitedConfig.set(Key.HIVE_SQL, querySql);
@@ -92,7 +96,6 @@ public class HiveJdbcReader extends Reader  {
         @Override
         public void post() {
             LOG.info("任务执行完毕,hive reader post");
-
         }
 
         @Override
@@ -106,10 +109,10 @@ public class HiveJdbcReader extends Reader  {
 
         private static final Logger LOG = LoggerFactory
                 .getLogger(Task.class);
-
+        private static final boolean IS_DEBUG = LOG.isDebugEnabled();
         private Configuration readerOriginConfig;
         private Connection conn;
-        private JDBCUtils jdbcDfsUtil = null;
+        private HiveJDBCUtils jdbcDfsUtil = null;
 
         @Override
         public void init() {
@@ -117,8 +120,6 @@ public class HiveJdbcReader extends Reader  {
             LOG.info("init() begin...");
             this.readerOriginConfig = super.getPluginJobConf();//获取job 分割后的每一个任务单独的配置文件
             this.validate();
-            jdbcDfsUtil = new JDBCUtils(this.readerOriginConfig);
-            conn = jdbcDfsUtil.getConnection();
             LOG.info("init() ok and end...");
         }
 
@@ -127,18 +128,14 @@ public class HiveJdbcReader extends Reader  {
             this.readerOriginConfig.getNecessaryValue(Key.USER_NAME, HiveJdbcReaderErrorCode.REQUIRED_VALUE);
             this.readerOriginConfig.getNecessaryValue(Key.PASSWORD, HiveJdbcReaderErrorCode.REQUIRED_VALUE);
             this.readerOriginConfig.getNecessaryValue(Key.HIVE_SQL, HiveJdbcReaderErrorCode.REQUIRED_VALUE);
-
         }
 
         @Override
         public void prepare() {
 
-            /**    0. 创建HIVE临时表，通过配置文件指定外部表的字段类型
-              *    1. 通过HQL将查询结果导入到临时表中
-             */
-
-
-
+            jdbcDfsUtil = new HiveJDBCUtils(this.readerOriginConfig);
+            conn = jdbcDfsUtil.getConnection();
+            LOG.info("hive jdbc 连接串已成功建立...");
         }
 
         @Override
@@ -147,42 +144,60 @@ public class HiveJdbcReader extends Reader  {
             ResultSet rs = null;
             PreparedStatement ps = null;
 
-            /**
-             * 读取Hive外部表
-             */
-            LOG.info("begin to read source files...");
+            LOG.info("开始执行HQL");
             try {
 
-                //读取记录的元数据
+                //执行查询，并解析记录的元数据
                 ps = conn.prepareStatement(readerOriginConfig.getString(Key.HIVE_SQL));
                 rs = ps.executeQuery();
                 int columnNumber = 0;
                 ResultSetMetaData metaData = rs.getMetaData();
                 columnNumber = metaData.getColumnCount();
 
+                //逐条数据发送到writer线程
                 while (rs.next()) {
                     this.transportOneRecord(recordSender, rs,
-                            metaData, columnNumber);
+                            metaData, columnNumber, super.getTaskPluginCollector());
                 }
+                LOG.info("HQL执行成功");
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error("HQL执行异常");
+                LOG.error("HQL读取数据发生异常:", e);
             } finally {
-                jdbcDfsUtil.disConnect(conn, rs, ps);
+                jdbcDfsUtil.closeConn(conn, rs, ps);
             }
-
-
-            LOG.info("end read source files...");
-
+            LOG.info("reader数据发送完毕");
         }
 
 
+        /**
+         * 将读取的记录发送到writer
+         * @param recordSender
+         * @param rs
+         * @param metaData
+         * @param columnNumber
+         * @param taskPluginCollector
+         * @return
+         */
         private Record transportOneRecord(RecordSender recordSender, ResultSet rs,
-                                            ResultSetMetaData metaData, int columnNumber) {
-            Record record = buildRecord(recordSender,rs,metaData,columnNumber);
+                                            ResultSetMetaData metaData, int columnNumber,
+                                          TaskPluginCollector taskPluginCollector) {
+            Record record = buildRecord(recordSender,rs,metaData,columnNumber, taskPluginCollector);
             recordSender.sendToWriter(record);
             return record;
         }
-        private Record buildRecord(RecordSender recordSender,ResultSet rs, ResultSetMetaData metaData, int columnNumber) {
+
+        /**
+         * 建立需要发送的记录实例
+         * @param recordSender
+         * @param rs
+         * @param metaData
+         * @param columnNumber
+         * @param taskPluginCollector
+         * @return
+         */
+        private Record buildRecord(RecordSender recordSender, ResultSet rs, ResultSetMetaData metaData,
+                                   int columnNumber, TaskPluginCollector taskPluginCollector) {
             Record record = recordSender.createRecord();
 
             try {
@@ -213,10 +228,6 @@ public class HiveJdbcReader extends Reader  {
                             record.addColumn(new DateColumn(rs.getTime(i)));
                             break;
 
-
-
-                        // warn: bit(1) -> Types.BIT 可使用BoolColumn
-                        // warn: bit(>1) -> Types.VARBINARY 可使用BytesColumn
                         case Types.BOOLEAN:
                         case Types.BIT:
                             record.addColumn(new BoolColumn(rs.getBoolean(i)));
@@ -242,9 +253,16 @@ public class HiveJdbcReader extends Reader  {
                     }
                 }
             } catch (Exception e) {
+                if (IS_DEBUG) {
+                    LOG.debug("read data " + record.toString()
+                            + " occur exception:", e);
+                }
+                //TODO 这里识别为脏数据靠谱吗？
+                taskPluginCollector.collectDirtyRecord(record, e);
                 if (e instanceof DataXException) {
                     throw (DataXException) e;
                 }
+
             }
             return record;
         }
@@ -254,46 +272,13 @@ public class HiveJdbcReader extends Reader  {
             /**
              *  读取完成以后这里可以放置一些校验工作
              */
-            LOG.info("one task hive read post...");
-            deleteHiveExternalTableAndS3Files();
+            LOG.info("hive jdbc reader task post方法执行");
         }
 
-        /**
-         * 删除外部表格和相关的S3文件
-         */
-        private void deleteHiveExternalTableAndS3Files() {
-
-        }
 
         @Override
         public void destroy() {
-            LOG.info("hive read destroy...");
-        }
-
-
-        public static void main(String[] args) {
-            try {
-//                String prefix = "data/platback/logs/mysql/push/";
-//                ObjectListing listObj = S3Util.listObj(prefix);
-//
-//                for (S3ObjectSummary objectSummary : listObj.getObjectSummaries()) {
-//                    String key = objectSummary.getKey();
-//                    System.out.println(key);
-//                }
-
-
-                S3Util.uploadObj( "data/platback/datax/tmp/0724-x1.txt", "/Users/fanchao/project/java/DataX/tmp/0724.txt");
-
-
-            } catch (AmazonServiceException e) {
-                // The call was transmitted successfully, but Amazon S3 couldn't process
-                // it, so it returned an error response.
-                e.printStackTrace();
-            } catch (SdkClientException e) {
-                // Amazon S3 couldn't be contacted for a response, or the client
-                // couldn't parse the response from Amazon S3.
-                e.printStackTrace();
-            }
+            LOG.info("hive jdbc reader task destroy方法执行");
         }
 
     }
