@@ -53,6 +53,10 @@
 
         <!-- reader -->
         <module>mysqlreader</module>
+        <module>streamreader</module>
+        <module>hivejdbcreader</module>
+        <module>txtfilereader</module>
+
         <!--<module>drdsreader</module>-->
         <!--<module>sqlserverreader</module>-->
         <!--<module>postgresqlreader</module>-->
@@ -60,9 +64,8 @@
         <!--<module>odpsreader</module>-->
         <!--<module>otsreader</module>-->
         <!--<module>otsstreamreader</module>-->
-        <!--<module>txtfilereader</module>-->
-        <module>hdfsreader</module>
-        <module>streamreader</module>
+<!--        <module>hdfsreader</module>-->
+
         <!--<module>ossreader</module>-->
         <!--<module>ftpreader</module>-->
 <!--        <module>mongodbreader</module>-->
@@ -71,16 +74,19 @@
         <!--<module>hbase094xreader</module>-->
         <!--<module>opentsdbreader</module>-->
         <!--<module>hivereader</module>-->
-        <module>hivejdbcreader</module>
+
 
         <!-- writer -->
         <module>mysqlwriter</module>
+        <module>hivewriter</module>
+        <module>txtfilewriter</module>
+        <module>streamwriter</module>
+
         <!--<module>drdswriter</module>-->
         <!--<module>odpswriter</module>-->
-        <module>txtfilewriter</module>
+
         <!--<module>ftpwriter</module>-->
         <!--<module>hdfswriter</module>-->
-        <module>streamwriter</module>
         <!--<module>otswriter</module>-->
         <!--<module>oraclewriter</module>-->
         <!--<module>sqlserverwriter</module>-->
@@ -98,7 +104,7 @@
         <!--<module>tsdbwriter</module>-->
 <!--        <module>adbpgwriter</module>-->
         <!--<module>gdbwriter</module>-->
-        <module>hivejdbcwriter</module>
+<!--        <module>hivejdbcwriter</module>-->
         
         <!-- common support module -->
         <module>plugin-rdbms-util</module>

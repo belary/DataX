@@ -8,17 +8,18 @@
         "content": [
             {
                 "reader": {
-                    "name": "streamreader",
+                    "name": "mysqlreader",
                     "parameter": {
-                        "sliceRecordCount": 5,
-                        "column": [
+                        "username": "person_rw",
+                        "password": "fdWUE89)3D*FdfWE43",
+                        "connection": [
                             {
-                                "type": "string",
-                                "value": "field1_string"
-                            },
-                            {
-                                "type": "string",
-                                "value": "hello，你好，世界-DataX"
+                                "querySql": [
+                                    "select msg_id,task_id from push_gt_detail where date=20180116 limit 500;"
+                                ],
+                                "jdbcUrl": [
+                                    "jdbc:mysql://10.100.10.22:3306/person"
+                                ]
                             }
                         ]
                     }

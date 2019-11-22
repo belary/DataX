@@ -8,17 +8,18 @@
         "content": [
             {
                 "reader": {
-                    "name": "streamreader",
+                    "name": "mysqlreader",
                     "parameter": {
-                        "sliceRecordCount": 5,
-                        "column": [
+                        "username": "person_rw",
+                        "password": "fdWUE89)3D*FdfWE43",
+                        "connection": [
                             {
-                                "type": "string",
-                                "value": "field1_string"
-                            },
-                            {
-                                "type": "string",
-                                "value": "hello，你好，世界-DataX"
+                                "querySql": [
+                                    "select msg_id,task_id from push_gt_detail where date=20180116 limit 500;"
+                                ],
+                                "jdbcUrl": [
+                                    "jdbc:mysql://10.100.10.22:3306/person"
+                                ]
                             }
                         ]
                     }
@@ -27,21 +28,22 @@
                     "name": "hivewriter",
                     "parameter": {
                         "databaseName": "fc",
-                        "tableName": "fc_t4",
+                        "tableName": "fc_p_1",
                         "defaultFS": "hdfs://localhost/",
                         "username": "fanchao",
                         "password": "fanchao",
                         "writeMode": "append",
                         "column": [
                             {
-                                "name": "content",
+                                "name": "id",
                                 "type": "string"
                             },
                             {
-                                "name": "pday",
+                                "name": "content",
                                 "type": "string"
                             }
-                        ]
+                        ],
+                        "partition": ["year=2019","month=2"]
                     }
                 }
             }

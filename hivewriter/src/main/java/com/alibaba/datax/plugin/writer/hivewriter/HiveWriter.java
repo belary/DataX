@@ -46,21 +46,25 @@ public class HiveWriter extends Writer{
 
         private void validateParameter() {
 
+            // 目标库
             this.conf
                     .getNecessaryValue(
                             Key.DATABASE_NAME,
                             HiveWriterErrorCode.REQUIRED_VALUE);
 
+            // 目标表
             this.conf
                     .getNecessaryValue(
                             Key.TABLE_NAME,
                             HiveWriterErrorCode.REQUIRED_VALUE);
 
+            // core-site中defaulFs的配置
             this.conf
                     .getNecessaryValue(
                             Key.DEFAULT_FS,
                             HiveWriterErrorCode.REQUIRED_VALUE);
 
+            // 插入模式
             this.conf
                     .getNecessaryValue(
                             Key.WRITE_MODE,
@@ -95,7 +99,7 @@ public class HiveWriter extends Writer{
         public List<Configuration> split(int mandatoryNumber) {
             this.defaultFS = this.conf.getString(Key.DEFAULT_FS);
 
-            //按照reader 配置文件的格式  来 组织相同个数的writer配置文件
+            //按照reader 配置文件的格式  来组织相同个数的writer配置文件
             List<Configuration> configurations = new ArrayList<Configuration>(mandatoryNumber);
 
             for (int i = 0; i < mandatoryNumber; i++) {
@@ -108,11 +112,12 @@ public class HiveWriter extends Writer{
                 String fileSuffix = UUID.randomUUID().toString().replace('-', '_');
                 String fullFileName=String.format("%s%s/%s__%s", defaultFS, this.tmpPath,this.tmpTableName,fileSuffix);// 临时存储的文件路径
 
+                // 设置hdfs临时文件名
                 splitedTaskConfig.set(Key.TMP_PATH,tmpPath);
                 splitedTaskConfig.set(Key.TMP_FULL_NAME,fullFileName);
                 splitedTaskConfig.set(Key.TMP_TABLE_NAME,this.tmpTableName);
 
-                //分区字段解析 "dt","type"
+                //分区字段解析
                 List<String> partitions = this.conf.getList(Key.PARTITION, String.class);
                 String partitionInfo=StringUtils.join(partitions,",");
                 splitedTaskConfig.set(Key.PARTITION,partitionInfo);
@@ -224,13 +229,27 @@ public class HiveWriter extends Writer{
             String partitionInfo=this.conf.getString(Key.PARTITION);
 
             //从临时表写入到目标表
-            String insertCmd="use "+this.databaseName+";" +
-                             "SET hive.exec.dynamic.partition=true;" +
-                             "SET hive.exec.dynamic.partition.mode=nonstrict;" +
-                             "SET hive.exec.max.dynamic.partitions.pernode=1000;" +
-                             "insert into table "+this.tableName +
-                             //" partition("+partitionInfo+") " +
-                             " select * from "+this.tmpTableName+";";
+
+            String insertCmd;
+            if (StringUtils.isNotBlank(partitionInfo)) {
+                insertCmd =
+                        "use " + this.databaseName + ";" +
+                                "SET hive.exec.dynamic.partition=true;" +
+                                "SET hive.exec.dynamic.partition.mode=nonstrict;" +
+                                "SET hive.exec.max.dynamic.partitions.pernode=1000;" +
+                                "insert into table " + this.tableName +
+                                " partition(" + partitionInfo + ") " +
+                                " select * from " + this.tmpTableName + ";";
+            } else {
+                insertCmd =
+                        "use " + this.databaseName + ";" +
+                                "SET hive.exec.dynamic.partition=true;" +
+                                "SET hive.exec.dynamic.partition.mode=nonstrict;" +
+                                "SET hive.exec.max.dynamic.partitions.pernode=1000;" +
+                                "insert into table " + this.tableName +
+                                " partition(" + partitionInfo + ") " +
+                                " select * from " + this.tmpTableName + ";";
+            }
 
             LOG.info("insertCmd ----> :" + insertCmd);
 

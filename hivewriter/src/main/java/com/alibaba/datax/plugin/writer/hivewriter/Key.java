@@ -19,7 +19,7 @@ public class Key {
     // must have
     public static final String WRITE_MODE = "writeMode";
 
-    public static final String HIVE_TMP_PATH="tmpPath";//临时hive表的location路径
+    public static final String TMP_PATH ="tmpPath";//临时hive表的location路径
 
     public static final String TMP_FULL_NAME="fullFileName";//临时hive 表  hdfs文件名称
 
