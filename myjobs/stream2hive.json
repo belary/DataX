@@ -1,0 +1,56 @@
+{
+    "job": {
+        "setting": {
+            "speed": {
+                 "channel":1
+            }
+        },
+        "content": [
+            {
+                "reader": {
+                    "name": "streamreader",
+                    "parameter": {
+                        "sliceRecordCount": 5,
+                        "column": [
+                            {
+                                "type": "string",
+                                "value": "field1_string"
+                            },
+                            {
+                                "type": "string",
+                                "value": "hello，你好，世界-DataX"
+                            }
+                        ]
+                    }
+                },
+                "writer": {
+                    "name": "hivejdbcwriter",
+                    "parameter": {
+                        "writeMode": "insert",
+                        "username": "fanchao",
+                        "password": "fanchao",
+                        "column": [
+                            "content",
+                            "pday"
+                        ],
+
+                        "preSql": [
+                            "delete from fc_t4"
+                        ],
+                        "connection": [
+                            {
+                                "jdbcUrl": "jdbc:hive2://localhost:10000/fc",
+                                "table": [
+                                    "fc_t4"
+                                ]
+                            }
+                        ],
+                        "table": [
+                          "fc_t4"
+                        ]
+                    }
+                }
+            }
+        ]
+    }
+}

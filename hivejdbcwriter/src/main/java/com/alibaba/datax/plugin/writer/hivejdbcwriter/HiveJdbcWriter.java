@@ -9,6 +9,7 @@ import com.alibaba.datax.common.spi.Writer;
 import com.alibaba.datax.common.util.Configuration;
 import com.alibaba.datax.plugin.rdbms.util.DBUtil;
 import com.alibaba.datax.plugin.rdbms.util.DBUtilErrorCode;
+import com.alibaba.datax.plugin.rdbms.util.DataBaseType;
 import com.alibaba.datax.plugin.rdbms.writer.Constant;
 import com.alibaba.datax.plugin.rdbms.writer.Key;
 import org.apache.commons.lang3.StringUtils;
@@ -29,17 +30,17 @@ public class HiveJdbcWriter extends Writer {
     public static class Job extends Writer.Job {
 
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
-        private Configuration writerOriginConfig = null;
+        private Configuration writerSliceConfig = null;
         private HiveHelper hiveHelper;
 
         @Override
         public void init() {
-            this.writerOriginConfig = super.getPluginJobConf();
-            hiveHelper = new HiveHelper();
+            this.writerSliceConfig = super.getPluginJobConf();
             //检查
-            hiveHelper.validateParam(writerOriginConfig);
-            LOG.debug("After job init(), originalConfig now is:[\n{}\n]",
-                    writerOriginConfig.toJSON());
+            hiveHelper = new HiveHelper();
+            hiveHelper.validateParam(writerSliceConfig);
+            LOG.debug("job init() 执行完成, originalConfig now is:\n{}\n",
+                    writerSliceConfig.toJSON());
         }
 
 
@@ -49,24 +50,27 @@ public class HiveJdbcWriter extends Writer {
             //this.commonRdbmsWriterJob.writerPreCheck(this.originalConfig, DATABASE_TYPE);
         }
 
-        //执行preSql
+
+        /**
+         * 这里执行job级别的所有presql
+         */
         @Override
         public void prepare() {
-            this.hiveHelper.prepare(this.writerOriginConfig);
+            this.hiveHelper.prepare(this.writerSliceConfig);
         }
 
         @Override
         public List<Configuration> split(int mandatoryNumber) {
 
             //按照table的个数 切分
-            LOG.info("分批查询HIVE开始");
-            List<String> tables = this.writerOriginConfig.getList(Key.TABLE, String.class);
+            LOG.info("分批导入HIVE表格开始");
+            List<String> tables = this.writerSliceConfig.getList(Key.TABLE, String.class);
             List<Configuration> readerSplitConfigs = new ArrayList<Configuration>();
             Configuration splitedConfig = null;
 
             // 一个查询语句返回一份配置，对应一个拆分，对应一组reader-writer线程足
             for (String table : tables) {
-                splitedConfig = this.writerOriginConfig.clone();
+                splitedConfig = this.writerSliceConfig.clone();
                 splitedConfig.set(Key.TABLE, table);
                 readerSplitConfigs.add(splitedConfig);
             }
@@ -90,57 +94,86 @@ public class HiveJdbcWriter extends Writer {
     public static class Task extends Writer.Task {
         private static final Logger LOG = LoggerFactory
                 .getLogger(Task.class);
-        private Configuration writerOriginConfig;
-        private Connection conn;
+
+        private static final String VALUE_HOLDER = "?";
+        protected static String INSERT_TEMPLATE;
+
+        protected Configuration writerSliceConfig;
         protected TaskPluginCollector taskPluginCollector;
         protected Triple<List<String>, List<Integer>, List<String>> resultSetMetaData;
 
+        // hive导入的目标表
         protected String table;
+
+        // 插入模式
+        protected String writeMode;
+
+        // hive 目标列
         protected List<String> columns;
+
+        // 每批导入的数据条数和每批的内存大小限制
         protected int batchSize;
         protected int batchByteSize;
+
+        // 目标列的数量
         protected int columnNumber = 0;
+
+        // 最后执行的插入HIVE表的SQL
         protected String writeRecordSql;
+
+        // 是否将NULL值作为空值插入
         protected boolean emptyAsNull;
-        private HiveJDBCUtils jdbcDfsUtil = null;
+
 
         @Override
         public void init() {
-            this.writerOriginConfig = super.getPluginJobConf();
-            this.table = writerOriginConfig.getString(Key.TABLE);
-            this.columns = writerOriginConfig.getList(Key.COLUMN, String.class);
+            this.writerSliceConfig = super.getPluginJobConf();
+            this.table = writerSliceConfig.getString(Key.TABLE);
+            this.columns = writerSliceConfig.getList(Key.COLUMN, String.class);
             this.columnNumber = this.columns.size();
-            this.batchSize = writerOriginConfig.getInt(Key.BATCH_SIZE, com.alibaba.datax.plugin.rdbms.writer.Constant.DEFAULT_BATCH_SIZE);
-            this.batchByteSize = writerOriginConfig.getInt(Key.BATCH_BYTE_SIZE, Constant.DEFAULT_BATCH_BYTE_SIZE);
-            this.jdbcDfsUtil = new HiveJDBCUtils(this.writerOriginConfig);
-            LOG.info("hive jdbc init 初始化完成...");
+            this.writeMode = writerSliceConfig.getString(Key.WRITE_MODE);
+            this.batchSize = writerSliceConfig.getInt(Key.BATCH_SIZE, com.alibaba.datax.plugin.rdbms.writer.Constant.DEFAULT_BATCH_SIZE);
+            this.batchByteSize = writerSliceConfig.getInt(Key.BATCH_BYTE_SIZE, Constant.DEFAULT_BATCH_BYTE_SIZE);
+            LOG.info("hive jdbc writer task init 初始化完成...");
         }
 
         @Override
         public void prepare() {
-            conn = jdbcDfsUtil.getConnection();
-            LOG.info("hive jdbc 连接串已成功建立...");
+           // conn = jdbcDfsUtil.getConnection();
+           //  LOG.info("hive jdbc 连接串已成功建立...");
         }
 
         @Override
         public void startWrite(RecordReceiver recordReceiver) {
             LOG.info("开始执行HQL");
-            startWriteWithConnection(recordReceiver, super.getTaskPluginCollector(), conn);
-            LOG.info("reader数据发送完毕");
+            //todo fc 这里的conn为空。不应该从jdbcDfsUtils中获取
+            startWrite(recordReceiver, writerSliceConfig, super.getTaskPluginCollector());
+            LOG.info("writer写数据完毕");
 
         }
 
+        public void startWrite(RecordReceiver recordReceiver,
+                               Configuration writerSliceConfig,
+                               TaskPluginCollector taskPluginCollector) {
+            String jdbcUrl = writerSliceConfig.getString(String.format("%s[0].%s",
+                    com.alibaba.datax.plugin.writer.hivejdbcwriter.Constant.CONN_MARK, Key.JDBC_URL));
+            String username = writerSliceConfig.getString(Key.USERNAME);
+            String password = writerSliceConfig.getString(Key.PASSWORD);
 
-        public void startWriteWithConnection(RecordReceiver recordReceiver, TaskPluginCollector taskPluginCollector, Connection connection) {
+            Connection connection = DBUtil.getConnection(DataBaseType.Hive,
+                    jdbcUrl, username, password);
+
+            startWriteWithConnection(recordReceiver, taskPluginCollector, connection);
+        }
+
+        public void startWriteWithConnection(RecordReceiver recordReceiver, TaskPluginCollector taskPluginCollector,
+                                             Connection connection) {
 
             this.taskPluginCollector = taskPluginCollector;
 
             // 用于写入数据的时候的类型根据目的表字段类型转换
             this.resultSetMetaData = DBUtil.getColumnMetaData(connection,
                     this.table, StringUtils.join(this.columns, ","));
-
-            // 写数据库的SQL语句
-            //calcWriteRecordSql();
 
             List<Record> writeBuffer = new ArrayList<Record>(this.batchSize);
             int bufferBytes = 0;
@@ -186,17 +219,14 @@ public class HiveJdbcWriter extends Writer {
                 throws SQLException {
             PreparedStatement preparedStatement = null;
             try {
-                connection.setAutoCommit(false);
-                preparedStatement = connection
-                        .prepareStatement(this.writeRecordSql);
 
                 for (Record record : buffer) {
+                    preparedStatement = connection.prepareStatement(calcWriteRecordSql());
                     preparedStatement = fillPreparedStatement(
                             preparedStatement, record);
-                    preparedStatement.addBatch();
+                    preparedStatement.execute();
                 }
-                preparedStatement.executeBatch();
-                connection.commit();
+
             } catch (SQLException e) {
                 LOG.warn("回滚此次写入, 采用每次写入一行方式提交. 因为:" + e.getMessage());
                 connection.rollback();
@@ -208,6 +238,7 @@ public class HiveJdbcWriter extends Writer {
                 DBUtil.closeDBResources(preparedStatement, null);
             }
         }
+
 
         protected void doOneInsert(Connection connection, List<Record> buffer) {
             PreparedStatement preparedStatement = null;
@@ -245,7 +276,6 @@ public class HiveJdbcWriter extends Writer {
                 int columnSqltype = this.resultSetMetaData.getMiddle().get(i);
                 preparedStatement = fillPreparedStatementColumnType(preparedStatement, i, columnSqltype, record.getColumn(i));
             }
-
             return preparedStatement;
         }
 
@@ -375,6 +405,66 @@ public class HiveJdbcWriter extends Writer {
             return preparedStatement;
         }
 
+        /**
+         * 计算批量插入的SQL语句
+         * @return
+         */
+        private String calcWriteRecordSql() {
+
+                List<String> valueHolders = new ArrayList<String>(columnNumber);
+                for (int i = 0; i < columns.size(); i++) {
+                    String type = resultSetMetaData.getRight().get(i);
+                    valueHolders.add(VALUE_HOLDER);
+                }
+
+                INSERT_TEMPLATE = getWriteTemplate(columns, valueHolders, writeMode);
+                return String.format(INSERT_TEMPLATE, this.table);
+        }
+
+
+        public  String getWriteTemplate(List<String> columnHolders, List<String> valueHolders, String writeMode) {
+
+            boolean isWriteModeLegal = writeMode.trim().toLowerCase().startsWith("insert");
+
+            if (!isWriteModeLegal) {
+                throw DataXException.asDataXException(DBUtilErrorCode.ILLEGAL_VALUE,
+                        String.format("您所配置的 writeMode:%s 错误. 因为DataX 目前仅支持 insert on duplicate 方式. 请检查您的配置并作出修改.", writeMode));
+            }
+
+            // && writeMode.trim().toLowerCase().startsWith("replace")
+            String writeDataSqlTemplate;
+            writeDataSqlTemplate = new StringBuilder()
+                    .append("INSERT INTO %s (").append(StringUtils.join(columnHolders, ","))
+                    .append(") VALUES(").append(StringUtils.join(valueHolders, ","))
+                    .append(")")
+                    .append(onDuplicateKeyUpdateString(columnHolders))
+                    .toString();
+
+            return writeDataSqlTemplate;
+        }
+
+
+        public  String onDuplicateKeyUpdateString(List<String> columnHolders){
+            if (columnHolders == null || columnHolders.size() < 1) {
+                return "";
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.append(" ON DUPLICATE KEY UPDATE ");
+            boolean first = true;
+            for(String column:columnHolders){
+                if(!first){
+                    sb.append(",");
+                }else{
+                    first = false;
+                }
+                sb.append(column);
+                sb.append("=VALUES(");
+                sb.append(column);
+                sb.append(")");
+            }
+
+            return sb.toString();
+        }
 
         @Override
         public void post() {

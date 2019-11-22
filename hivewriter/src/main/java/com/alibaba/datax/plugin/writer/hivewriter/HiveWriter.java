@@ -102,9 +102,7 @@ public class HiveWriter extends Writer{
             for (int i = 0; i < mandatoryNumber; i++) {
 
                 Configuration splitedTaskConfig = this.conf.clone();
-
                 tmpPath = Constants.TMP_PREFIX + KeyUtil.genUniqueKey();//创建临时Hive表 存储地址
-
                 this.tmpTableName=hiveTableName();
 
                 //后面需要指定写入的文件名称
@@ -114,6 +112,7 @@ public class HiveWriter extends Writer{
                 splitedTaskConfig.set(Key.HIVE_TMP_PATH,tmpPath);
                 splitedTaskConfig.set(Key.TMP_FULL_NAME,fullFileName);
                 splitedTaskConfig.set(Key.TMP_TABLE_NAME,this.tmpTableName);
+
                 //分区字段解析 "dt","type"
                 List<String> partitions = this.conf.getList(Key.PARTITION, String.class);
                 String partitionInfo=StringUtils.join(partitions,",");
@@ -152,23 +151,14 @@ public class HiveWriter extends Writer{
         //写入hive步骤 (1)创建临时表  (2)读取数据写入临时表  (3) 从临时表写出数据
 
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
-
         private Configuration conf;
-
         private String databaseName;
-
         private String tmpTableName;
-
         private String tableName;//目标表名称
-
         private String writeMode;
-
-        private boolean alreadyDel=false;
-
+        private boolean alreadyDel = false;
         private String tmpPath;
-
         private String defaultFS;
-
         private HdfsHelper hdfsHelper = null;//工具类
 
 
@@ -186,14 +176,13 @@ public class HiveWriter extends Writer{
 
             hdfsHelper = new HdfsHelper();
             hdfsHelper.getFileSystem(defaultFS, conf);
-
         }
 
 
         @Override
         public void prepare() {
-            //创建hive临时表,数据先写入临时表,空表
 
+            //创建hive临时表,数据先写入临时表,空表
             this.tmpPath=this.conf.getString(Key.HIVE_TMP_PATH);
 
 
@@ -222,10 +211,12 @@ public class HiveWriter extends Writer{
 
         @Override
         public void startWrite(RecordReceiver lineReceiver) {
+
             //(2)读取数据写入临时表,默认创建的临时表是orc格式，效率比较高，占用磁盘空间小
             LOG.info("begin do write...");
             String fullFileName=this.conf.getString(Key.TMP_FULL_NAME);// 临时存储的文件路径
             LOG.info(String.format("write to file : [%s]", fullFileName));
+
             //写ORC FILE
             hdfsHelper.orcFileStartWrite(lineReceiver,this.conf, fullFileName,
                         this.getTaskPluginCollector());
