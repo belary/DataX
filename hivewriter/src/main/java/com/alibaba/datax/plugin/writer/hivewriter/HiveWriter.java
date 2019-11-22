@@ -247,7 +247,6 @@ public class HiveWriter extends Writer{
                                 "SET hive.exec.dynamic.partition.mode=nonstrict;" +
                                 "SET hive.exec.max.dynamic.partitions.pernode=1000;" +
                                 "insert into table " + this.tableName +
-                                " partition(" + partitionInfo + ") " +
                                 " select * from " + this.tmpTableName + ";";
             }
 
