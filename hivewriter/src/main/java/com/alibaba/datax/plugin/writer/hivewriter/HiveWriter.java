@@ -56,7 +56,6 @@ public class HiveWriter extends Writer{
                             Key.TABLE_NAME,
                             HiveWriterErrorCode.REQUIRED_VALUE);
 
-
             this.conf
                     .getNecessaryValue(
                             Key.DEFAULT_FS,
@@ -76,7 +75,8 @@ public class HiveWriter extends Writer{
             log.info("job prepare start");
             String mode=this.conf.getString(Key.WRITE_MODE);//获取写入方式
 
-            if(mode.equals(Constants.OVERWRITE_MODE)){
+            // 清空模式先清理表
+            if(mode.equalsIgnoreCase("truncate")){
                 //需要清空表，然后在执行所有task
                 String prepareCmd ="use "+databaseName+";" +
                         "truncate table "+tableName+";";
@@ -88,14 +88,13 @@ public class HiveWriter extends Writer{
                             HiveWriterErrorCode.SHELL_ERROR,
                             "前置清空表失败");
                 }
-
             }
-
         }
 
         @Override
         public List<Configuration> split(int mandatoryNumber) {
             this.defaultFS = this.conf.getString(Key.DEFAULT_FS);
+
             //按照reader 配置文件的格式  来 组织相同个数的writer配置文件
             List<Configuration> configurations = new ArrayList<Configuration>(mandatoryNumber);
 
@@ -109,7 +108,7 @@ public class HiveWriter extends Writer{
                 String fileSuffix = UUID.randomUUID().toString().replace('-', '_');
                 String fullFileName=String.format("%s%s/%s__%s", defaultFS, this.tmpPath,this.tmpTableName,fileSuffix);// 临时存储的文件路径
 
-                splitedTaskConfig.set(Key.HIVE_TMP_PATH,tmpPath);
+                splitedTaskConfig.set(Key.TMP_PATH,tmpPath);
                 splitedTaskConfig.set(Key.TMP_FULL_NAME,fullFileName);
                 splitedTaskConfig.set(Key.TMP_TABLE_NAME,this.tmpTableName);
 
@@ -183,8 +182,7 @@ public class HiveWriter extends Writer{
         public void prepare() {
 
             //创建hive临时表,数据先写入临时表,空表
-            this.tmpPath=this.conf.getString(Key.HIVE_TMP_PATH);
-
+            this.tmpPath=this.conf.getString(Key.TMP_PATH);
 
             //创建临时表，不分区
             List<Configuration>  columns = this.conf.getListConfiguration(Key.COLUMN);
@@ -205,7 +203,6 @@ public class HiveWriter extends Writer{
 
             addHook();
             LOG.info("创建hive 临时表结束 end!!!");
-
         }
 
 
@@ -227,13 +224,13 @@ public class HiveWriter extends Writer{
             String partitionInfo=this.conf.getString(Key.PARTITION);
 
             //从临时表写入到目标表
-
             String insertCmd="use "+this.databaseName+";" +
                              "SET hive.exec.dynamic.partition=true;" +
                              "SET hive.exec.dynamic.partition.mode=nonstrict;" +
                              "SET hive.exec.max.dynamic.partitions.pernode=1000;" +
-                             "insert into table "+this.tableName+" partition("+partitionInfo+") " +
-                             "select * from "+this.tmpTableName+";";
+                             "insert into table "+this.tableName +
+                             //" partition("+partitionInfo+") " +
+                             " select * from "+this.tmpTableName+";";
 
             LOG.info("insertCmd ----> :" + insertCmd);
 
@@ -259,6 +256,9 @@ public class HiveWriter extends Writer{
         }
 
 
+        /**
+         * 钩子
+         */
         private void addHook(){
             if(!alreadyDel){
                 Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -271,6 +271,9 @@ public class HiveWriter extends Writer{
         }
 
 
+        /**
+         * 删除临时表
+         */
         private void deleteTmpTable() {
 
             String hiveCmd = "use "+this.databaseName+";" +
